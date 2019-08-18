@@ -1,2 +1,4 @@
-
+/dist
+/clickhouse2pandas.egg-info
+/build
 *.pyc
