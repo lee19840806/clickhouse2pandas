@@ -1,4 +1,4 @@
-# clickhouse2pandas
+## clickhouse2pandas
 Select **ClickHouse** data, convert **to pandas** dataframes and various other formats, by using the [ClickHouse HTTP interface](https://clickhouse.yandex/docs/en/interfaces/http/).
 
 ### Features
@@ -26,3 +26,15 @@ limit 100
 df = ch2pd.select_data(connection_url, query)
 # df is a pandas dataframe converted from ClickHouse query result
 ```
+
+### API Reference
+```python
+clickhouse2pandas.select_data(connection_url, query = None, convert_to = 'DataFrame', settings = None)
+```
+Return a formatted query result specified by "convert_to" parameter.
+
+**Parameters:**
+- **connection_url**: the connection url to the ClickHouse HTTP interface, e.g., `http://user:password@clickhouse_host:8123`
+- **query**: the SQL query
+- **convert_to**: convert the query result into specific format, could be one of the following: 'DataFrame', 'TabSeparated', 'TabSeparatedRaw', 'TabSeparatedWithNames', 'TabSeparatedWithNamesAndTypes', 'CSV', 'CSVWithNames', 'Values', 'Vertical', 'JSON', 'JSONCompact', 'JSONEachRow', 'TSKV', 'Pretty', 'PrettyCompact', 'PrettyCompactMonoBlock', 'PrettyNoEscapes',  'PrettySpace', 'XML'. Refer to ClickHouse [Input and Output Formats](https://clickhouse.yandex/docs/en/interfaces/formats/)
+- **settings**: a dict containing the setting key-values, default settings are {'enable_http_compression': 1, 'send_progress_in_http_headers': 0,'log_queries': 1, 'connect_timeout': 10, 'receive_timeout': 300, 'send_timeout': 300, 'output_format_json_quote_64bit_integers': 0, 'wait_end_of_query': 0}. Refer to ClickHouse [Settings](https://clickhouse.yandex/docs/en/operations/settings/settings/)
