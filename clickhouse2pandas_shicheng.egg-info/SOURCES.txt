@@ -1,0 +1,6 @@
+README.md
+setup.py
+clickhouse2pandas_shicheng.egg-info/PKG-INFO
+clickhouse2pandas_shicheng.egg-info/SOURCES.txt
+clickhouse2pandas_shicheng.egg-info/dependency_links.txt
+clickhouse2pandas_shicheng.egg-info/top_level.txt

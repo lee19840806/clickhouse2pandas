@@ -1,0 +1,14 @@
+Metadata-Version: 2.1
+Name: clickhouse2pandas-shicheng
+Version: 0.0.1
+Summary: Select ClickHouse data, convert to pandas dataframes
+Home-page: https://github.com/lee19840806/clickhouse2pandas
+Author: Shicheng Li
+Author-email: leegao36@163.com
+License: UNKNOWN
+Description: Select ClickHouse data, convert to pandas dataframes and various other formats, by using the ClickHouse HTTP interface
+Platform: UNKNOWN
+Classifier: Programming Language :: Python :: 3
+Classifier: License :: OSI Approved :: MIT License
+Classifier: Operating System :: OS Independent
+Description-Content-Type: text/markdown
