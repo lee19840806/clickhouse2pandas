@@ -14,7 +14,7 @@ import time
 import pandas
 
 name = 'clickhouse2pandas'
-version = '0.0.2'
+version = '0.0.3'
 
 def select(connection_url, query = None, convert_to = 'DataFrame', settings = None):
     updated_settings = {

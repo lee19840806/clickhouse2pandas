@@ -13,7 +13,7 @@ with open('README.md', 'r') as fh:
 
 setuptools.setup(
     name = 'clickhouse2pandas',
-    version = '0.0.2',
+    version = '0.0.3',
     author = 'Shicheng Li',
     author_email = 'leegao36@163.com',
     description = 'Select ClickHouse data, convert to pandas dataframes',
