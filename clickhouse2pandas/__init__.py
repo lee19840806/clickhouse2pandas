@@ -45,9 +45,9 @@ def select(connection_url, query = None, convert_to = 'DataFrame', settings = No
         conn.request('GET', '/')
         ret_value = conn.getresponse().read().decode().replace('\n', '')
     else:
-        if query.strip(' \n\t').lower().startswith('select') == False:
-            raise ValueError('"query" should start with "select", while the provided "query" starts with "{0}"'.format(
-                query.strip(' \n\t').split(' ')[0]))
+        if query.strip(' \n\t').lower()[:6] not in ['select', 'descri']:
+            raise ValueError('"query" should start with "select" or "describe", ' + \
+                'while the provided "query" starts with "{0}"'.format(query.strip(' \n\t').split(' ')[0]))
 
     accepted_formats = ['DataFrame', 'TabSeparated', 'TabSeparatedRaw', 'TabSeparatedWithNames',
         'TabSeparatedWithNamesAndTypes', 'CSV', 'CSVWithNames', 'Values', 'Vertical', 'JSON', 'JSONCompact', 'JSONEachRow',
@@ -66,23 +66,28 @@ def select(connection_url, query = None, convert_to = 'DataFrame', settings = No
 
     if updated_settings['enable_http_compression'] == 1:
         conn.request('POST', '/?' + urllib.parse.urlencode(http_get_params),
-            body = gzip.compress(query_with_format.encode('utf-8')),
+            body = gzip.compress(query_with_format.encode()),
             headers = {'Content-Encoding': 'gzip', 'Accept-Encoding': 'gzip'})
     else:
-        conn.request('POST', '/?' + urllib.parse.urlencode(http_get_params), body = query_with_format.encode('utf-8'))
+        conn.request('POST', '/?' + urllib.parse.urlencode(http_get_params), body = query_with_format.encode())
 
     resp = conn.getresponse()
 
     if resp.status == 404:
         error_message = gzip.decompress(resp.read()).decode() if updated_settings['enable_http_compression'] == 1 \
             else resp.read().decode()
+        conn.close()
         raise ValueError(error_message)
     elif resp.status == 401:
-        raise ConnectionRefusedError(resp.reason)
+        conn.close()
+        raise ConnectionRefusedError(resp.reason + '. The username or password is incorrect.')
     else:
         if resp.status != 200:
+            error_message = gzip.decompress(resp.read()).decode() if updated_settings['enable_http_compression'] == 1 \
+                else resp.read().decode()
+            conn.close()
             raise NotImplementedError('Unknown Error: status: {0}, reason: {1}, message: {2}'.format(
-                resp.status, resp.reason, resp.read().decode()))
+                resp.status, resp.reason, error_message))
 
     total = bytes()
     bytes_downloaded = 0
@@ -95,6 +100,7 @@ def select(connection_url, query = None, convert_to = 'DataFrame', settings = No
             last_time = time.time()
             print('\rDownloaded: %.1f MB.' % (bytes_downloaded / 1024 / 1024), end = '\r')
     print()
+    conn.close()
 
     ret_value = gzip.decompress(total).decode() if updated_settings['enable_http_compression'] == 1 else total.decode()
 
