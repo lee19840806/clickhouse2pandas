@@ -17,7 +17,7 @@ import pandas
 name = 'clickhouse2pandas'
 version = '0.0.3'
 
-def select(connection_url, query = None, convert_to = 'DataFrame', settings = None):
+def _merge_settings(settings):
     updated_settings = {
         'enable_http_compression'                :   1,
         'send_progress_in_http_headers'          :   0,
@@ -38,6 +38,11 @@ def select(connection_url, query = None, convert_to = 'DataFrame', settings = No
 
     for i in updated_settings:
         updated_settings[i] = 1 if updated_settings[i] == True else 0 if updated_settings[i] == False else updated_settings[i]
+
+    return updated_settings
+
+def select(connection_url, query = None, convert_to = 'DataFrame', settings = None):
+    updated_settings = _merge_settings(settings)
 
     components = urllib.parse.urlparse(connection_url)
 
@@ -118,26 +123,7 @@ def select(connection_url, query = None, convert_to = 'DataFrame', settings = No
     return ret_value
 
 def insert(connection_url, db_table, df, settings):
-    updated_settings = {
-        'enable_http_compression'                :   1,
-        'send_progress_in_http_headers'          :   0,
-        'log_queries'                            :   1,
-        'connect_timeout'                        :  10,
-        'receive_timeout'                        : 300,
-        'send_timeout'                           : 300,
-        'output_format_json_quote_64bit_integers':   0,
-        'wait_end_of_query'                      :   0}
-
-    if settings is not None:
-        invalid_setting_keys = list(set(settings.keys()) - set(updated_settings.keys()))
-        if len(invalid_setting_keys) > 0:
-            raise ValueError('setting "{0}" is invalid, valid settings are: {1}'.format(
-                invalid_setting_keys[0], ', '.join(updated_settings.keys())))
-
-        updated_settings.update(settings)
-
-    for i in updated_settings:
-        updated_settings[i] = 1 if updated_settings[i] == True else 0 if updated_settings[i] == False else updated_settings[i]
+    updated_settings = _merge_settings(settings)
 
     if db_table.find('.') < 1:
         raise ValueError('Argument "db_table" must be provided in the form of "your_db.your_table".')
