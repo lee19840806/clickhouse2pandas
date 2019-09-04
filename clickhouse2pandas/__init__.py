@@ -15,7 +15,44 @@ import numpy
 import pandas
 
 name = 'clickhouse2pandas'
-version = '0.0.3'
+version = '0.0.4'
+
+def _get_ch_data_range(col_def):
+    col_def['is_nullable'] = col_def['type'].str.startswith('Nullable(')
+
+    col_def['range'] = numpy.where(col_def['is_nullable'], col_def['type'].str[9:-1], col_def['type'])
+
+    min_dict = {
+        'Int8'  : -128,
+        'Int16' : -32768,
+        'Int32' : -2147483648,
+        'Int64' : -9223372036854775808,
+        'UInt8' : 0,
+        'UInt16': 0,
+        'UInt32': 0,
+        'UInt64': 0}
+
+    max_dict = {
+        'Int8'  : 127,
+        'Int16' : 32767,
+        'Int32' : 2147483647,
+        'Int64' : 9223372036854775807,
+        'UInt8' : 255,
+        'UInt16': 65535,
+        'UInt32': 4294967295,
+        'UInt64': 18446744073709551615}
+
+    col_def['column_type'] = \
+        numpy.where(col_def['range'].isin(list(min_dict.keys()) + ['Float32', 'Float64']), 'Numeric',
+        numpy.where(col_def['range'].str.startswith('FixedString'), 'FixedString', col_def['range']))
+
+    col_def['min'] = col_def['range'].apply(lambda x: min_dict.get(x, None))
+    col_def['max'] = col_def['range'].apply(lambda x: max_dict.get(x, None))
+
+    col_def['string_len'] = numpy.where(col_def['column_type'] == 'FixedString', col_def['range'].str[12:-1], None)
+    col_def['string_len'] = col_def['string_len'].astype(numpy.float64)
+
+    return col_def
 
 def _merge_settings(settings):
     updated_settings = {
